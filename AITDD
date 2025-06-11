@@ -31,7 +31,7 @@ public with sharing class Example {
             FROM Account
             WHERE Id = :con.AccountId
         ];
-//asdasda
+
 
         // ✅ VALUE UPDATE – documented DML assignment and case normalization:contentReference[oaicite:1]{index=1}
         con.FirstName = firstName;
@@ -46,4 +46,4 @@ public with sharing class Example {
         update con;
         update acc;
     }
-}
+
