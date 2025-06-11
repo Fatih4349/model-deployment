@@ -1,0 +1,49 @@
+public with sharing class Example {
+
+    public class AuthorizationException extends Exception {}
+
+    public static void updateCustomer(
+        Id contactId,
+        String companyName,
+        String firstName,
+        String lastName,
+        String email,
+        String phone
+    ) {
+        // ✅ PROFILE CHECK (via SOQL) – explicitly shown in Salesforce doc for filtering user context
+        User currentUser = [
+            SELECT Profile.Name
+            FROM User
+            WHERE Id = :UserInfo.getUserId()
+        ];
+        if (currentUser.Profile.Name == 'Standard User') {
+            throw new AuthorizationException('Standard User profile is not allowed to execute this method.');
+        }
+
+        // ✅ QUERY by primary key (no LIMIT needed) – consistent with best practices:contentReference[oaicite:0]{index=0}
+        Contact con = [
+            SELECT Id, AccountId, FirstName, LastName, Email
+            FROM Contact
+            WHERE Id = :contactId
+        ];
+        Account acc = [
+            SELECT Id, Name, Phone, Website
+            FROM Account
+            WHERE Id = :con.AccountId
+        ];
+//asdasda
+
+        // ✅ VALUE UPDATE – documented DML assignment and case normalization:contentReference[oaicite:1]{index=1}
+        con.FirstName = firstName;
+        con.LastName = lastName;
+        con.Email = email != null ? email.toLowerCase() : null;
+
+        acc.Name = companyName;
+        acc.Phone = phone;
+        acc.Website = 'https://domain.com';
+
+        // ✅ SEPARATE DMLs FOR RELATED RECORDS – required as per Salesforce guidelines:contentReference[oaicite:2]{index=2}
+        update con;
+        update acc;
+    }
+}
